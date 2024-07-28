@@ -25,6 +25,7 @@
             const url = encodeURIComponent(this.form.link)
             const response = await axios.get(`http://localhost:3000/proxy?url=${url}`)
             // console.log(response.data);
+            response.data.data.title = decodeURIComponent(response.data.data.title)
             this.text = response.data
             console.log(response.data)
         }
