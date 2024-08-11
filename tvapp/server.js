@@ -5,24 +5,33 @@ const app = express();
 const port = 3000;
 const http = require('http');
 const bcrypt = require('bcrypt');
-// const session = require('express-session');
-// const RedisStore = require('connect-redis')(session);
-// const redis = require('redis');
+const jwt = require('jsonwebtoken');
 const server = http.createServer(app)
-// const fs = require('fs');
+const fs = require('fs').promises;
+const path = require('path');
 const bodyParser = require('body-parser');
 const { Sequelize, DataTypes } = require('sequelize');
-
 app.use(express.json());
 app.use(bodyParser.json());
+const publickDirectory = path.join(__dirname, 'plylists');
+
+app.use(express.static(publickDirectory)); //раздача статических файлов из диретории
+
 const sequelize = new Sequelize('mysql', 'root', 'root',{
     host: '127.0.0.1',
     port: 8889,
     dialect: 'mysql',
     dialectOptions: {
         socketPath: '/Applications/MAMP/tmp/mysql/mysql.sock'
+    },
+    pool: {
+        max: 1000,
+        min: 0
     }
 });
+
+const JWT_SECRET = 'lilitopchik10061997'; //секретный ключ jwt
+
 async function connDb() {
     try {
         await sequelize.authenticate();
@@ -45,7 +54,7 @@ async function dissDb() {
 async function sichDb() {
     try {
         await connDb(); 
-        await sequelize.sync(); 
+        await sequelize.sync({alter: true}); 
         console.log('Синхронизация завершена');
     } catch (e) {
         console.error('Ошибка при синхронизации:', e);
@@ -56,7 +65,9 @@ async function sichDb() {
 
 sichDb(); // Вызов функции
 
+
 //Модели
+//Пользователи
 const Users = sequelize.define('users', {
     id: {
         type: DataTypes.INTEGER,
@@ -75,9 +86,131 @@ const Users = sequelize.define('users', {
         type: DataTypes.STRING,
 
         allowNull: false
+    },
+    jwt: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    usertable: {
+        type: DataTypes.STRING,
+        allowNull:true
     }
 })
+//Модель сохранения видео в бд
+const Video = sequelize.define('videos', {
+   id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
+   },
+   title: {
+    type: DataTypes.STRING,
+    allowNull: false
+   },
+   description: {
+    type: DataTypes.STRING,
+    allowNull: true
+   },
+   thumb: {
+    type: DataTypes.STRING,
+    allowNull: true
+   },
+   duration: {
+    type: DataTypes.STRING,
+    allowNull: true
+   },
+   link: {
+    type: DataTypes.STRING,
+    allowNull: false
+   }
+})
+//функция создания таблицы пользателя для хранения видеозаписей
+async function createTable(replaceMail, title, thumb, link) {
+    const CustomTable = sequelize.define('custom_table', {
+        id: {
+            type: DataTypes.INTEGER,
+            autoIncrement: true,
+            primaryKey: true
+        },
+        title: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        thumb: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        link: {
+            type: DataTypes.STRING(1000),
+            allowNull: false
+        }
+    },
+    {
+        tableName: replaceMail
+    })
+    await sichDb();
+    if (title && thumb && link) {
+        await CustomTable.create({
+            title: title,
+            thumb: thumb,
+            link: link
+        })
+        console.log('Данные записаны в таблицу');
+        const allVideo = await CustomTable.findAll();
+        console.log(allVideo, replaceMail)
+        writeFile(allVideo,replaceMail)
+    } else {
+        console.log('Таблица создана')
+    }
+};
+//Функция записи в файл
+async function writeFile(allVideo, replaceMail) {
+    const pathFile = path.join(__dirname,'playlists', replaceMail, 'pl.m3u');
 
+    try {
+        // Открываем файл и очищаем его
+        await fs.writeFile(pathFile, '#EXTM3U\n'); // Это заменяет содержимое файла и сразу записывает начальный текст
+
+        // Записываем каждую строку
+        for (const el of allVideo) {
+            const line = `#EXTINF:0 type="video", tvg-logo="${el.dataValues.thumb}", ${el.dataValues.title}\n${el.dataValues.link}\n`;
+            await fs.appendFile(pathFile, line);
+        }
+
+        console.log('Файл успешно записан');
+    } catch (err) {
+        console.error('Ошибка при записи в файл:', err);
+        throw err; // Передаём ошибку выше
+    }
+}
+//Функция поллучения видеозаписией
+async function getVideosOfUser(usertable) {
+    const CustomTable = sequelize.define('custom_table', {
+        id: {
+            type: DataTypes.INTEGER,
+            autoIncrement: true,
+            primaryKey: true
+        },
+        title: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        thumb: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        link: {
+            type: DataTypes.STRING(1000),
+            allowNull: false
+        }
+    },
+    {
+        tableName: usertable
+    })
+    const videos = await CustomTable.findAll()
+    return videos;
+}
+var salt = bcrypt.genSaltSync(10); //cоль для хэширования паролей
 
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*'); // Разрешить все источники
@@ -94,20 +227,104 @@ app.post('/register', async(req, res) => {
         res.status(400).json({message: 'Пароли не совпадают'});
         return;
     } else {
-        var salt = bcrypt.genSaltSync(10);
         const hashPass = bcrypt.hashSync(pass, salt);
         console.log(hashPass)
         try {
             await connDb();
             const response = await Users.create({name: name, mail: mail, password: hashPass});
-            if(response) {
-                res.status(200).send('Зареган')
+            const resAgain = await Users.findOne({where: {mail: mail}});
+            const id = resAgain.dataValues.id;
+            const userName = resAgain.dataValues.name;
+            const playload = {
+                id: id,
+                name: userName
+            }
+            const token = jwt.sign(playload, JWT_SECRET, {expiresIn: '365d'}); //создаем jwt токен
+            console.log(id, userName, playload, token);
+            //создаем таблицу
+            const replaceMail = mail.replace(/[@,.\-!]/g, '');
+            await createTable(replaceMail);
+            // создаем директорию
+            fs.mkdirSync(`playlists/${replaceMail}`, {recursive: true}, (err) => {
+                if(err) throw err;
+                console.log('Директория создана');
+            });
+            //создаем файл
+            const fileDescriptor = fs.openSync(`playlists/${replaceMail}/pl.m3u`, 'w')
+            fs.closeSync(fileDescriptor)
+            console.log('Файл создан')
+            //обновляем таблицу jwt и названием таблицы пользователя
+            const uPd = await Users.update({jwt: token, usertable: replaceMail}, {where: {mail: mail}});
+            if(response && resAgain && uPd) {
+                res.status(200).json({jwt: token})
             }
         } catch(error) {
             console.log(error)
         }
     }
-    await dissDb();
+    // await dissDb();
+})
+app.post('/login', async(req, res) => {
+    const { mail, pass } = req.body;
+    console.log(mail, pass);
+    try {
+        await connDb();
+        const response = await Users.findOne({where: {mail: mail}})
+        console.log(response)
+        if (response) {
+            const isMatch = await bcrypt.compare(pass, response.dataValues.password);
+            if (isMatch) {
+                const playload = {
+                    id: response.dataValues.id,
+                    name: response.dataValues.name
+                }
+                const token = jwt.sign(playload, JWT_SECRET, {expiresIn: '365d'});
+                console.log(token);
+                const update = await Users.update({jwt: token}, {where: {mail:mail}})
+                if (update) {
+                    res.status(200).json({jwt: token});
+                }
+            }
+        } else {
+            res.status(400).json({message: 'Такого пользователя не существует'})
+        }
+    } catch(error) {
+        console.log(error)
+    }
+})
+
+app.get('/isAuth', async (req, res) => {
+    const token = req.headers['authorization'].split(' ')[1];
+
+    try {
+        const userId = jwt.verify(token, JWT_SECRET).id;
+        console.log(userId);
+        
+        const response = await Users.findOne({where: {id: userId}})
+        if (response) {
+            if (response.dataValues.jwt === token) {
+                const resVid = await getVideosOfUser(response.dataValues.usertable);
+                return res.status(200).json({datas: resVid})
+            } else {
+                return res.status(500).send('Не авторизован')
+            }
+        }
+        
+    } catch (error) {
+        console.log('Token error:', error);
+        return res.status(403).send('Неверный или истекший токен');
+    }
+});
+
+app.get('/logOut', async (req, res) => {
+    const token = req.headers['authorization'].split(' ')[1];
+    const userId = jwt.verify(token, JWT_SECRET).id
+    try {
+        const response = await Users.update({jwt: null}, {where: {id: userId}})
+        res.status(200).send('Вы вышли из системы');
+    } catch(error) {
+        console.log(error)
+    }
 })
 
 app.post('/getdata', async (req, res) => {
@@ -116,8 +333,9 @@ app.post('/getdata', async (req, res) => {
     const regVk = /https:\/\/vk/;
     const regRt = /https:\/\/rutube/;
     const regYt = /https:\/\/youtube/;
+    const reYttwo = /https:\/\/youtu/;
 
-    if (regVk.test(link) || regYt.test(link)) {
+    if (regVk.test(link) || regYt.test(link) || reYttwo.test(link)) {
         getVk(link, res);
     } else if (regRt.test(link)) {
         getLinkRu(link, res);
@@ -126,10 +344,69 @@ app.post('/getdata', async (req, res) => {
     }
 })
 
+app.post('/savevideo', async(req, res) => {
+    const { title, thumb, link } = req.body;
+    console.log(title, thumb, link)
+    const token = req.headers['authorization'].split(' ')[1];
+    const userId = jwt.verify(token, JWT_SECRET).id;
+    try {
+        const findUser = await Users.findOne({where: {id: userId}});
+        if (findUser) {
+            const replaceMail = findUser.dataValues.usertable;
+            await createTable(replaceMail, title, thumb, link);
+            // await writeDatainFile(replaceMail)
+            res.status(200).send('данные записаны')
+        } else {
+            res.status(500).send('Ошибка записи')
+        }
+    } catch(error) {
+        console.log(error);
+    }
+})
+app.post('/deleteItem', async(req,res) => {
+    const token = req.headers['authorization'].split(' ')[1];
+    const videoId = req.body.id
+    console.log(videoId, token)
+    try {
+        const userId = jwt.verify(token, JWT_SECRET).id;
+        const responseUser = await Users.findOne({where: {id: userId}})
+        const tableName = responseUser.dataValues.usertable;
+        const CustomTable = sequelize.define('custom_table', {
+            id: {
+                type: DataTypes.INTEGER,
+                autoIncrement: true,
+                primaryKey: true
+            },
+            title: {
+                type: DataTypes.STRING,
+                allowNull: false
+            },
+            thumb: {
+                type: DataTypes.STRING,
+                allowNull: true
+            },
+            link: {
+                type: DataTypes.STRING(1000),
+                allowNull: false
+            }
+        },
+        {
+            tableName: tableName
+        })
+        const deleteItem = await CustomTable.destroy({where: {id: videoId}});
+        if (deleteItem) {
+            const responsNewData = await CustomTable.findAll();
+            await writeFile(responsNewData, tableName)
+            res.status(200).json({datas: responsNewData})
+        }
+    } catch(error) {
+        console.log(error);
+    }
+})
+
 async function getVk(link, res) {
     try {
         const response = await axios.get(`https://theofficialvkr.xyz/data/trial.php?vkr=${link}`);
-        console.log(response.data);
         res.send(response.data)
     } catch(error) {
         res.status(500).send(`Error fetching the URL: ${error.message}`);
@@ -141,11 +418,11 @@ async function getLinkRu(link, res) {
     const regOpt = /r=wd/
     link = link.replace(reg, 'https://rutube.ru/api/play/options/')
     link = link.replace(regOpt, 'no_404=true&referer=https%253A%252F%252Frutube.ru&pver=v2&yclid=1722022439692254743');
-    console.log(link);
+    // console.log(link);
 
     const response = await axios.get(link);
-    console.log(response.data.video_balancer.m3u8)
-    getLink(response.data.video_balancer.m3u8, res);
+    // console.log(response.data.video_balancer.m3u8)
+    getLink(response.data.video_balancer.m3u8, response.data.thumbnail_url, response.data.title, res);
 }
 
 // app.get('/proxy', async (req, res) => {
@@ -193,7 +470,7 @@ async function getLinkRu(link, res) {
     
 // });
 
-async function getLink(url, res) {
+async function getLink(url, img, title, res) {
     try {
         const regex = /[?&]([^=#]+)=([^&#]*)/g;
 
@@ -227,9 +504,8 @@ async function getLink(url, res) {
           };
         
         const response = await axios.get(url, { params, headers });
-        
-        console.log(response.data);
-        res.send(response.data);
+        // console.log(response.data);
+        res.status(200).json({links: response.data, thumb: img, title: title});
     } catch(error) {
         console.log(error);
         res.status(500).send('Ошибка сервера');
