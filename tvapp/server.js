@@ -173,7 +173,7 @@ async function writeFile(allVideo, replaceMail) {
 
         // Записываем каждую строку
         for (const el of allVideo) {
-            const line = `#EXTINF:0 type="video", tvg-logo="${el.dataValues.thumb}", ${el.dataValues.title}\n${el.dataValues.link}\n`;
+            const line = `#EXTINF:0 type="video" tvg-logo="${el.dataValues.thumb}", ${el.dataValues.title}\n${el.dataValues.link}\n`;
             await fs.appendFile(pathFile, line);
         }
 
@@ -411,7 +411,7 @@ async function getVk(link, res) {
     } catch(error) {
         res.status(500).send(`Error fetching the URL: ${error.message}`);
     }
-};
+}
 
 async function getLinkRu(link, res) {
     const reg = /https:\/\/rutube\.ru\/video\//;
