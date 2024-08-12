@@ -11,12 +11,25 @@ const fs = require('fs').promises;
 const path = require('path');
 const bodyParser = require('body-parser');
 const { Sequelize, DataTypes } = require('sequelize');
+const nodemailer = require('nodemailer');
 app.use(express.json());
 app.use(bodyParser.json());
 const publickDirectory = path.join(__dirname, 'plylists');
 
 app.use(express.static(publickDirectory)); //раздача статических файлов из диретории
 
+//Настройки Nodemailer
+const transport = nodemailer.createTransport({
+    host: '',
+    port: '',
+    secure: true,
+    auth: {
+        user: '',
+        pass: ''
+    }
+})
+
+//Настройки БД
 const sequelize = new Sequelize('mysql', 'root', 'root',{
     host: '127.0.0.1',
     port: 8889,
@@ -210,6 +223,22 @@ async function getVideosOfUser(usertable) {
     const videos = await CustomTable.findAll()
     return videos;
 }
+//Функция отправки письма при регистрации
+async function sendMailToUser(mail, name) {
+    try {
+        const response = await transport.sendMail({
+            from: '',
+            to: '',
+            subject: '',
+            html: ''
+        })
+        if (response) {
+            return(response.data)
+        }
+    } catch(error) {
+        console.log(error)
+    }
+}
 var salt = bcrypt.genSaltSync(10); //cоль для хэширования паролей
 
 app.use((req, res, next) => {
@@ -255,6 +284,7 @@ app.post('/register', async(req, res) => {
             console.log('Файл создан')
             //обновляем таблицу jwt и названием таблицы пользователя
             const uPd = await Users.update({jwt: token, usertable: replaceMail}, {where: {mail: mail}});
+            await sendMailToUser(mail, name);
             if(response && resAgain && uPd) {
                 res.status(200).json({jwt: token})
             }
