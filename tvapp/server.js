@@ -19,7 +19,7 @@ const options = {
     key: fs.readFileSync('/etc/letsencrypt/live/webmarvels.ru-0001/privkey.pem;'),
     cert: fs.readFileSync('/etc/letsencrypt/live/webmarvels.ru-0001/fullchain.pem;')
 };
-const server = https.createServer(app)
+const server = https.createServer(options, app)
 app.use(express.static(publickDirectory)); //раздача статических файлов из диретории
 
 //Настройки Nodemailer
