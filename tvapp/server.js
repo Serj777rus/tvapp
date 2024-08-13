@@ -309,7 +309,7 @@ app.post('/login', async(req, res) => {
         if (response) {
             const isMatch = await bcrypt.compare(pass, response.dataValues.password);
             if (isMatch) {
-                if (response.dataValues.jwt && response.dataValues.jwt!== null) {
+                if (response.dataValues.jwt && response.dataValues.jwt !== null) {
                     res.status(200).json({jwt: response.dataValues.jwt})
                 } else {
                     const playload = {
