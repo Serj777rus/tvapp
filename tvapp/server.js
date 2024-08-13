@@ -14,7 +14,7 @@ const { Sequelize, DataTypes } = require('sequelize');
 const nodemailer = require('nodemailer');
 app.use(express.json());
 app.use(bodyParser.json());
-const publickDirectory = path.join(__dirname, 'plylists');
+const publickDirectory = path.join(__dirname, 'playlists');
 
 app.use(express.static(publickDirectory)); //раздача статических файлов из диретории
 
