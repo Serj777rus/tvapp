@@ -17,8 +17,8 @@ app.use(bodyParser.json());
 const publickDirectory = path.join(__dirname, 'playlists');
 
 const options = {
-    key: fsNopromise.readFileSync('/etc/letsencrypt/live/webmarvels.ru-0001/privkey.pem;'),
-    cert: fsNopromise.readFileSync('/etc/letsencrypt/live/webmarvels.ru-0001/fullchain.pem;')
+    key: fsNopromise.readFileSync('/etc/letsencrypt/live/webmarvels.ru-0001/privkey.pem'),
+    cert: fsNopromise.readFileSync('/etc/letsencrypt/live/webmarvels.ru-0001/fullchain.pem')
 };
 const server = https.createServer(options, app)
 app.use(express.static(publickDirectory)); //раздача статических файлов из диретории
