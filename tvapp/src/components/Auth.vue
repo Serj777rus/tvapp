@@ -51,7 +51,7 @@ import axios from 'axios';
         methods: {
             async regPost() {
                 try {
-                    const response = await axios.post('http://localhost:3000/register', this.form);
+                    const response = await axios.post('api/register', this.form);
                     if (response.status == 200) {
                         console.log('Регистрация прошла')
                         console.log(response.data.jwt);
@@ -77,7 +77,7 @@ import axios from 'axios';
             },
             async authPost() {
                 try {
-                    const response = await axios.post('http://127.0.0.1:3000/login', this.authform);
+                    const response = await axios.post('api/login', this.authform);
                     if (response.status == 200) {
                         localStorage.setItem('jwt', response.data.jwt);
                             this.$router.push('/')

@@ -32,14 +32,14 @@
 
 <style scoped>
     .populare_video_div {
-        width: 1200px;
+        width: 100%;
         display: flex;
         flex-direction: column;
         gap: 16px;
         margin-top: 32px;
     }
     .populare_video_div p {
-        font-size: 24px;
+        font-size: 20px;
         line-height: 100%;
         font-weight: 700;
     }
@@ -49,22 +49,24 @@
         flex-direction: row;
         gap:16px;
         overflow-x: scroll;
-        box-sizing: content-box;
+        box-sizing: border-box;
     }
     .video {
-        width: 240px;
+        max-width: 112px;
         display: flex;
         flex-direction: column;
+        justify-content: space-between;
         gap: 4px;
     }
     .video img {
-        width: 100%;
+        height: 200px;
+        aspect-ratio: 9/16;
         object-fit: cover;
-        border-radius: 16px;
+        border-radius: 8px;
         box-shadow: 2px 2px 4px 0px rgba(255, 255, 255, .2);
     }
     .video p {
-        font-size: 12px;
+        font-size: 8px;
     }
     .video button {
         padding: 4px 16px;
@@ -72,6 +74,7 @@
         background: green;
         border: none;
         border-radius: 4px;
+        font-size: 8px;
     }
     .error_video_block {
         width: 100%;

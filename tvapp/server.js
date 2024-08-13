@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const app = express();
-const port = 3000;
+const port = 4000;
 const http = require('http');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -19,23 +19,23 @@ const publickDirectory = path.join(__dirname, 'plylists');
 app.use(express.static(publickDirectory)); //раздача статических файлов из диретории
 
 //Настройки Nodemailer
-const transport = nodemailer.createTransport({
-    host: '',
-    port: '',
-    secure: true,
-    auth: {
-        user: '',
-        pass: ''
-    }
-})
+// const transport = nodemailer.createTransport({
+//     host: '',
+//     port: '',
+//     secure: true,
+//     auth: {
+//         user: '',
+//         pass: ''
+//     }
+// })
 
 //Настройки БД
-const sequelize = new Sequelize('mysql', 'root', 'root',{
+const sequelize = new Sequelize('mmldb', 'root', '03101989Ss',{
     host: '127.0.0.1',
-    port: 8889,
+    port: 3306,
     dialect: 'mysql',
     dialectOptions: {
-        socketPath: '/Applications/MAMP/tmp/mysql/mysql.sock'
+        socketPath: '/var/run/mysqld/mysqld.sock'
     },
     pool: {
         max: 1000,
@@ -224,21 +224,21 @@ async function getVideosOfUser(usertable) {
     return videos;
 }
 //Функция отправки письма при регистрации
-async function sendMailToUser(mail, name) {
-    try {
-        const response = await transport.sendMail({
-            from: '',
-            to: '',
-            subject: '',
-            html: ''
-        })
-        if (response) {
-            return(response.data)
-        }
-    } catch(error) {
-        console.log(error)
-    }
-}
+// async function sendMailToUser(mail, name) {
+//     try {
+//         const response = await transport.sendMail({
+//             from: '',
+//             to: '',
+//             subject: '',
+//             html: ''
+//         })
+//         if (response) {
+//             return(response.data)
+//         }
+//     } catch(error) {
+//         console.log(error)
+//     }
+// }
 var salt = bcrypt.genSaltSync(10); //cоль для хэширования паролей
 
 app.use((req, res, next) => {
@@ -284,7 +284,7 @@ app.post('/register', async(req, res) => {
             console.log('Файл создан')
             //обновляем таблицу jwt и названием таблицы пользователя
             const uPd = await Users.update({jwt: token, usertable: replaceMail}, {where: {mail: mail}});
-            await sendMailToUser(mail, name);
+            // await sendMailToUser(mail, name);
             if(response && resAgain && uPd) {
                 res.status(200).json({jwt: token})
             }
@@ -304,15 +304,19 @@ app.post('/login', async(req, res) => {
         if (response) {
             const isMatch = await bcrypt.compare(pass, response.dataValues.password);
             if (isMatch) {
-                const playload = {
-                    id: response.dataValues.id,
-                    name: response.dataValues.name
-                }
-                const token = jwt.sign(playload, JWT_SECRET, {expiresIn: '365d'});
-                console.log(token);
-                const update = await Users.update({jwt: token}, {where: {mail:mail}})
-                if (update) {
-                    res.status(200).json({jwt: token});
+                if (response.dataValues.jwt && response.dataValues.jwt!== null) {
+                    res.status(200).json({jwt: response.dataValues.jwt})
+                } else {
+                    const playload = {
+                        id: response.dataValues.id,
+                        name: response.dataValues.name
+                    }
+                    const token = jwt.sign(playload, JWT_SECRET, {expiresIn: '365d'});
+                    console.log(token);
+                    const update = await Users.update({jwt: token}, {where: {mail:mail}})
+                    if (update) {
+                        res.status(200).json({jwt: token});
+                    }
                 }
             }
         } else {
@@ -431,6 +435,41 @@ app.post('/deleteItem', async(req,res) => {
         }
     } catch(error) {
         console.log(error);
+    }
+})
+//Получения списка видео после добавления
+app.get('/updata', async(req,res) => {
+    const token = req.headers['authorization'].split(' ')[1];
+    try {
+        const userId = jwt.verify(token, JWT_SECRET).id
+        const responseUser = await Users.findOne({where: {id: userId}});
+        const userTable = responseUser.dataValues.usertable;
+        const CustomTable = sequelize.define('custom_table', {
+            id: {
+                type: DataTypes.INTEGER,
+                autoIncrement: true,
+                primaryKey: true
+            },
+            title: {
+                type: DataTypes.STRING,
+                allowNull: false
+            },
+            thumb: {
+                type: DataTypes.STRING,
+                allowNull: true
+            },
+            link: {
+                type: DataTypes.STRING(1000),
+                allowNull: false
+            }
+        },
+        {
+            tableName: userTable
+        });
+        const responsNewData = await CustomTable.findAll();
+        res.status(200).json({datas: responsNewData})
+    } catch(error) {
+        console.log(error)
     }
 })
 
