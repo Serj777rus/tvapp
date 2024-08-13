@@ -7,6 +7,7 @@ const https = require('https');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const fs = require('fs').promises;
+const fsNopromise = require('fs');
 const path = require('path');
 const bodyParser = require('body-parser');
 const { Sequelize, DataTypes } = require('sequelize');
@@ -16,8 +17,8 @@ app.use(bodyParser.json());
 const publickDirectory = path.join(__dirname, 'playlists');
 
 const options = {
-    key: fs.readFileSync('/etc/letsencrypt/live/webmarvels.ru-0001/privkey.pem;'),
-    cert: fs.readFileSync('/etc/letsencrypt/live/webmarvels.ru-0001/fullchain.pem;')
+    key: fsNopromise.readFileSync('/etc/letsencrypt/live/webmarvels.ru-0001/privkey.pem;'),
+    cert: fsNopromise.readFileSync('/etc/letsencrypt/live/webmarvels.ru-0001/fullchain.pem;')
 };
 const server = https.createServer(options, app)
 app.use(express.static(publickDirectory)); //раздача статических файлов из диретории
