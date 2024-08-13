@@ -1,34 +1,40 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
     <div v-if="loading" class="loader_main"><span class="loader"></span></div>
-    <div class="main_page" v-else-if="isToken">
-        <div class="header">
-            <p>Привет {{ userName }}</p>
-            <span>My media library<br>сервис удобного хранения медиатеки Rutube и Vk Video</span>
-            <button @click="logOut">Выйти</button>
-        </div>
-        <PopularVideo :videos="myvideos"></PopularVideo>
-        <div class="form">
-            <form @submit.prevent="postLink">
-                <input type="text" required v-model="form.link">
-                <button type="submit">Получить</button>
-            </form>
-        </div>
-        <div class="video_block">
-            <div class="poster">
-                <img :src="dataOfVideo.thumb">
-                <p>{{ dataOfVideo.title }}</p>
+    <div class="main_page_div" v-else-if="isToken">
+        <div class="main_page">
+            <div class="header">
+                <p>Привет {{ userName }}</p>
+                <span>My media library<br>сервис удобного хранения медиатеки Rutube и Vk Video</span>
+                <button @click="logOut">Выйти</button>
             </div>
-            <div class="video_butons">
-                <button v-for="btn in arrL" :key="btn.link" @click="inputSendingData(btn.link || btn.url)">{{ btn.format || btn.resolution }}</button>
+            <PopularVideo :videos="myvideos"></PopularVideo>
+            <div class="form">
+                <p>Добавить новое видео из Vk Video и RuTube</p>
+                <div class="form_div">
+                    <form @submit.prevent="postLink">
+                        <input type="text" required v-model="form.link">
+                        <button type="submit">Получить</button>
+                    </form>
+                    <div class="video_block">
+                        <div class="poster">
+                            <img :src="dataOfVideo.thumb">
+                            <p>{{ dataOfVideo.title }}</p>
+                        </div>
+                        <div class="video_butons">
+                            <button v-for="btn in arrL" :key="btn.link" @click="inputSendingData(btn.link || btn.url)">{{ btn.format || btn.resolution }}</button>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="my_videos">
-            <div class="my_bideos_div">
-                <div class="video" v-for="video in myvideos" :key="video.id">
-                    <img :src="video.thumb">
-                    <p>{{ video.title }}</p>
-                    <button @click="deleteVideo(video.id)">Удалить</button>
+            <div class="my_videos">
+                <p>Мои видео</p>
+                <div class="my_bideos_div">
+                    <div class="video" v-for="video in myvideos" :key="video.id">
+                        <img :src="video.thumb">
+                        <p>{{ video.title }}</p>
+                        <button @click="deleteVideo(video.id)">Удалить</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -38,15 +44,18 @@
         <button @click="this.$router.push('/auth')">Перейти</button>
         <p>Если Вы аторизованы, но видите это, то просто перезагрузите страницу</p>
     </div>
+    <NavBar></NavBar>
 </template>
 
 <script>
     import axios from 'axios';
     import { jwtDecode } from 'jwt-decode';
     import PopularVideo from './other_components/PopularVideo.vue';
+    import NavBar from './other_components/NavBar.vue';
     export default {
         components: {
-            PopularVideo
+            PopularVideo,
+            NavBar
         },
         data() {
             return {
@@ -273,7 +282,158 @@
   }
 }
 /* Основная страница */
-
+.main_page_div {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.main_page {
+    width: 1200px;
+    display: flex;
+    flex-direction: column;
+}
+.header {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+.header p {
+    font-size: 16px;
+    font-weight: 300;
+}
+.header span {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+}
+.header button {
+    padding: 8px 12px;
+    border-radius: 32px;
+    box-sizing: border-box;
+    border: none;
+    font-size: 12px;
+    line-height: 100%;
+    color: #fff;
+    background: red;
+}
+.form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 32px;
+}
+.form_div {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 32px;
+}
+.form p {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 100%;
+}
+.form_div form {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 12px;
+}
+.form_div form input {
+    width: 100%;
+    padding: 8px 12px;
+    box-sizing: border-box;
+    font-size: 16px;
+    color: #333;
+    border: none;
+    border-radius: 32px;
+}
+.form_div form button {
+    font-size: 12px;
+    color: #fff;
+    background: green;
+    line-height: 100%;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+}
+.video_block {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px
+}
+.poster {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px
+}
+.poster img {
+    width: 100%;
+    border-radius: 16px;
+    object-fit: cover;
+}
+.poster p {
+    font-size:  16px;
+    line-height: 100%;
+}
+.video_butons {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.my_videos {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 32px
+}
+.my_videos p {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 100%;
+}
+.my_bideos_div {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.video {
+    width: 240px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: start;
+}
+.video img {
+    width: 100%;
+    object-fit: cover;
+    border-radius: 16px;
+}
+.video p {
+    font-size: 12px;
+    line-height: 100%;
+}
+.video button {
+    padding: 4px 16px;
+    line-height: 100%;
+    color: #fff;
+    background: red;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+}
 
 /* Блок ошибки авторизации */
 .auth_block {

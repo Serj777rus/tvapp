@@ -14,7 +14,7 @@
 #app {
   font-family: "Comfortaa", sans-serif;
   line-height: 100%;
-  background: #333;
+  background: rgb(23, 25, 29);
   color: #fff
 }
 @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap');

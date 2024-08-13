@@ -8,7 +8,7 @@
                 <button>Добавить к себе</button>
             </div>
         </div>
-        <div class="error_video_block">
+        <div class="error_video_block" v-else>
             <p>Этот раздел находится в разработке и скором времени будет доступен</p>
         </div>
     </div>
@@ -35,7 +35,13 @@
         width: 1200px;
         display: flex;
         flex-direction: column;
-        gap: 16px
+        gap: 16px;
+        margin-top: 32px;
+    }
+    .populare_video_div p {
+        font-size: 24px;
+        line-height: 100%;
+        font-weight: 700;
     }
     .poplare_video_block {
         width: 100%;
@@ -43,6 +49,7 @@
         flex-direction: row;
         gap:16px;
         overflow-x: scroll;
+        box-sizing: content-box;
     }
     .video {
         width: 240px;
@@ -54,7 +61,7 @@
         width: 100%;
         object-fit: cover;
         border-radius: 16px;
-        box-shadow: 0px 0px 12px 2px rgba(0, 0, 0, .3);
+        box-shadow: 2px 2px 4px 0px rgba(255, 255, 255, .2);
     }
     .video p {
         font-size: 12px;
