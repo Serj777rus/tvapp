@@ -274,8 +274,8 @@ app.post('/register', async(req, res) => {
             const replaceMail = mail.replace(/[@,.\-!]/g, '');
             await createTable(replaceMail);
             // создаем директорию
-            fs.mkdirSync(`playlists/${replaceMail}`, {recursive: true}, (err) => {
-                if(err) throw err;
+            fs.mkdir(`playlists/${replaceMail}`, { recursive: true }, (err) => {
+                if (err) throw err;
                 console.log('Директория создана');
             });
             //создаем файл
