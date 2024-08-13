@@ -3,10 +3,9 @@ const express = require('express');
 const axios = require('axios');
 const app = express();
 const port = 4000;
-const http = require('http');
+const https = require('https');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const server = http.createServer(app)
 const fs = require('fs').promises;
 const path = require('path');
 const bodyParser = require('body-parser');
@@ -16,6 +15,11 @@ app.use(express.json());
 app.use(bodyParser.json());
 const publickDirectory = path.join(__dirname, 'playlists');
 
+const options = {
+    key: fs.readFileSync('/etc/letsencrypt/live/webmarvels.ru-0001/privkey.pem;'),
+    cert: fs.readFileSync('/etc/letsencrypt/live/webmarvels.ru-0001/fullchain.pem;')
+};
+const server = https.createServer(app)
 app.use(express.static(publickDirectory)); //раздача статических файлов из диретории
 
 //Настройки Nodemailer
