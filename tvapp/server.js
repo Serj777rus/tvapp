@@ -274,13 +274,13 @@ app.post('/register', async(req, res) => {
             const replaceMail = mail.replace(/[@,.\-!]/g, '');
             await createTable(replaceMail);
             // создаем директорию
-            fs.mkdir(`playlists/${replaceMail}`, { recursive: true }, (err) => {
+            await fs.mkdir(`playlists/${replaceMail}`, { recursive: true }, (err) => {
                 if (err) throw err;
                 console.log('Директория создана');
             });
             //создаем файл
-            const fileDescriptor = fs.openSync(`playlists/${replaceMail}/pl.m3u`, 'w')
-            fs.closeSync(fileDescriptor)
+            const fileDescriptor = await fs.open(`playlists/${replaceMail}/pl.m3u`, 'w')
+            await fs.close(fileDescriptor)
             console.log('Файл создан')
             //обновляем таблицу jwt и названием таблицы пользователя
             const uPd = await Users.update({jwt: token, usertable: replaceMail}, {where: {mail: mail}});
