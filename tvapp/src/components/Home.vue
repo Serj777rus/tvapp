@@ -34,11 +34,11 @@
                             </div>
                             <div class="spoke"></div>
                         </div>
-                        <div class="poster">
+                        <div class="poster" v-show="!hamsterloader">
                             <img :src="dataOfVideo.thumb">
                             <p>{{ dataOfVideo.title }}</p>
                         </div>
-                        <div class="video_butons">
+                        <div class="video_butons" v-show="!hamsterloader">
                             <button class="button" v-for="btn in arrL" :key="btn.link" @click="inputSendingData(btn.link || btn.url)">
                                 <div class="svg-wrapper-1">
                                     <div class="svg-wrapper">
@@ -104,7 +104,8 @@
                 loading: true,
                 sendingData: {},
                 myvideos: [],
-                hamsterloader: false
+                hamsterloader: false,
+                nodesrv: process.env.VUE_APP_NODE_APP
             }
         },
         methods: {
@@ -112,7 +113,7 @@
                 this.arrL = [];
                 this.dataOfVideo = {};
                 this.hamsterloader = true;
-                const response = await axios.post(`api/getdata`, this.form);
+                const response = await axios.post(`${this.nodesrv}/getdata`, this.form);
                 // console.log(response.data);
                 if (response.data.title) {
                     // console.log(response.data.title);
@@ -171,17 +172,16 @@
             },
             async getIsAuth() {
                 const token = localStorage.getItem('jwt');
-                console.log(token)
                 if (!token) {
                     this.$router.push('auth')
                 } else {
                     try {
-                    const response = await axios.get('api/isAuth', { headers: { 'Authorization': `Bearer ${token}` } });
+                    const response = await axios.get(`${this.nodesrv}/isAuth`, { headers: { 'Authorization': `Bearer ${token}` } });
                     if (response.status == 200) {
-                        this.isToken = true;
                         this.userName = jwtDecode(token).name;
                         console.log(response.data.datas);
-                        this.myvideos = response.data.datas
+                        this.myvideos = response.data.datas;
+                        this.isToken = true;
                     }
                     } catch(error) {
                         console.log(error);
@@ -190,7 +190,7 @@
             },
             async logOut() {
                 const token = localStorage.getItem('jwt');
-                const response = await axios.get('api/logout', {headers: {'Authorization': `Bearer ${token}`}});
+                const response = await axios.get(`${this.nodesrv}/logout`, {headers: {'Authorization': `Bearer ${token}`}});
                 if (response.status == 200) {
                     localStorage.removeItem('jwt');
                     this.isToken = false;
@@ -205,7 +205,7 @@
                 this.sendingData.title = this.dataOfVideo.title
                 console.log(this.sendingData);
                 const token = localStorage.getItem('jwt')
-                const response = await axios.post('api/savevideo', this.sendingData, {headers: {'Authorization': `Berear ${token}`}});
+                const response = await axios.post(`${this.nodesrv}/savevideo`, this.sendingData, {headers: {'Authorization': `Berear ${token}`}});
                 if (response.status == 200) {
                     console.log('Видео успешно добавлено в плейлист');
                     this.dataOfVideo = {};
@@ -216,9 +216,8 @@
             },
             async deleteVideo(id) {
                 const token = localStorage.getItem('jwt');
-                console.log(id);
                     try {
-                        const response = await axios.post('api/deleteItem', {id: id}, {headers: {'Authorization': `Berear ${token}`}});
+                        const response = await axios.post(`${this.nodesrv}/deleteItem`, {id: id}, {headers: {'Authorization': `Berear ${token}`}});
                         if (response.status == 200) {
                             console.log('Видео удалено из базы');
                             this.myvideos = [];
@@ -231,7 +230,7 @@
             async getDataAfterAdd() {
                 const token = localStorage.getItem('jwt');
                 try {
-                    const response = await axios.get('api/updata', {headers: {'Authorization': `Berear ${token}`}});
+                    const response = await axios.get(`${this.nodesrv}/updata`, {headers: {'Authorization': `Berear ${token}`}});
                     this.myvideos = [];
                     this.myvideos = response.data.datas
                 } catch(error) {

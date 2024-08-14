@@ -2,8 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const app = express();
-const port = 4000;
+const port = 3000;
 const https = require('https');
+// const http = require('http');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const fs = require('fs').promises;
@@ -33,14 +34,19 @@ app.use(express.static(publickDirectory)); //раздача статически
 //         pass: ''
 //     }
 // })
+const BASE = process.env.BASE
+const USERBASE = process.env.USERBASE
+const PASSBASE = process.env.PASSBASE
+const PORTBASE = process.env.PORTBASE
+const SOCKET = process.env.SOCKET
 
 //Настройки БД
-const sequelize = new Sequelize('mmldb', 'root', '03101989Ss',{
+const sequelize = new Sequelize(BASE, USERBASE, PASSBASE,{
     host: '127.0.0.1',
-    port: 3306,
+    port: PORTBASE,
     dialect: 'mysql',
     dialectOptions: {
-        socketPath: '/var/run/mysqld/mysqld.sock'
+        socketPath: SOCKET
     },
     pool: {
         max: 1000,
@@ -477,7 +483,23 @@ app.get('/updata', async(req,res) => {
         console.log(error)
     }
 })
-
+//Проверка пользователя
+app.post('/checkmail', async(req,res) => {
+    const email = req.body.email
+    console.log(email);
+    try {
+        const response = await Users.findOne({where: {mail: email}});
+        console.log(response);
+        if (response == null) {
+            return res.status(200).json({message: 'Email свободен', status: '200'})
+        } else if(response.dataValues.mail === email) {
+            return res.status(200).json({message: 'Такой пользователь уже зарегистрирован', status: '400'})
+        }
+    } catch(error) {
+        console.log(error)
+        return res.status(500).json({ message: 'Ошибка сервера' });
+    }
+})
 async function getVk(link, res) {
     try {
         const response = await axios.get(`https://theofficialvkr.xyz/data/trial.php?vkr=${link}`);

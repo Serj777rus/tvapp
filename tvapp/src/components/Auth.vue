@@ -6,10 +6,13 @@
                 <img src="../assets/auth/reg.png">
                 <span class="h2">Регистрация</span>
                 <div class="reginputs">
-                    <input v-model="form.name" id="name" type="text" name="name" placeholder="Ваше имя" required>
-                    <input v-model="form.mail" id="mail" type="email" name="mail" placeholder="Ваш email" required>
-                    <input v-model="form.pass" id="password" type="password" name="password" placeholder="Придумайте пароль" required>
-                    <input v-model="form.confirm" id="pass" type="password" name="pass" placeholder="Повторите пароль" required>
+                    <input v-model="form.name" type="text" name="name" placeholder="Ваше имя" required>
+                    <input v-model="form.mail" @input="debounsing" type="email" name="mail" placeholder="Ваш email" required>
+                    <div v-if="message">{{ message }}</div>
+                    <input v-model="form.pass" @input="checkPass(form.pass)" type="password" name="password" placeholder="Придумайте пароль" required>
+                    <div v-if="messagepass">{{ messagepass }}</div>
+                    <input v-model="form.confirm" @input="checkConfirm(form.confirm)" id="pass" type="password" name="pass" placeholder="Повторите пароль" required>
+                    <div v-if="confirmmessage">{{ confirmmessage }}</div>
                 </div>
                 <button type="submit">Зарегистрироваться</button>
                 <p @click="changeForm">Уже зарегистрированы? Авторизуйтесь</p>
@@ -21,7 +24,6 @@
                     <input v-model="authform.mail" id="mail" type="email" name="mail" placeholder="Email" required>
                     <input v-model="authform.pass" id="password" type="password" name="password" placeholder="Пароль" required>
                 </div>
-                <div>{{ message }}</div>
                 <button type="submit">Войти</button>
                 <p @click="changeForm">Еще не зарегистрированы? Жми сюда</p>
             </form>
@@ -31,6 +33,7 @@
 
 <script>
 import axios from 'axios';
+import { debounce } from 'lodash';
     export default {
         data() {
             return {
@@ -41,22 +44,27 @@ import axios from 'axios';
                     confirm: ''
                 },
                 message: '',
+                messagepass: '',
+                confirmmessage: '',
                 authform: {
                     mail: '',
                     pass: ''
                 },
-                isRegOrAuth: true
+                isRegOrAuth: true,
+                nodesrv: process.env.VUE_APP_NODE_APP
             }
         },
         methods: {
             async regPost() {
                 try {
-                    const response = await axios.post('api/register', this.form);
+                    const response = await axios.post(`${this.nodesrv}/register`, this.form);
                     if (response.status == 200) {
                         console.log('Регистрация прошла')
                         console.log(response.data.jwt);
                         localStorage.setItem('jwt', response.data.jwt);
-                        this.$router.push('/');
+                        setTimeout(() => {
+                            this.$router.push('/');
+                        }, 500);
                     } 
                 } catch(error) {
                     if (error.response && error.response.status == 400) {
@@ -77,7 +85,7 @@ import axios from 'axios';
             },
             async authPost() {
                 try {
-                    const response = await axios.post('api/login', this.authform);
+                    const response = await axios.post(`${this.nodesrv}/login`, this.authform);
                     if (response.status == 200) {
                         localStorage.setItem('jwt', response.data.jwt);
                             this.$router.push('/')
@@ -88,11 +96,54 @@ import axios from 'axios';
                 } catch(error) {
                     console.log(error);
                 }
+            },
+            async checkEmail(value) {
+                if (value.length == 0) {
+                    this.message = ''
+                } else {
+                    try {
+                    const response = await axios.post(`${this.nodesrv}/checkmail`, {email: value});
+                    if (response.data.status == '200') {
+                        this.message = ''
+                        this.message = response.data.message
+                    } else if (response.data.status == '400') {
+                        this.message = ''
+                        this.message = response.data.message
+                    }
+                } catch(error) {
+                    console.log(error)
+                }
+                }
+            },
+            debounsing() {
+                this.debounceCheckEmail(this.form.mail)
+            },
+            checkPass(value) {
+                if (value.length == 0) {
+                    this.messagepass = ''
+                }
+                else if (value.length <= 4) {
+                    this.messagepass = 'Слишком короткий пароль'
+                } else {
+                    this.messagepass = 'Хороший пароль'
+                }
+            },
+            checkConfirm(value) {
+                if (value.length == 0) {
+                    this.confirmmessage = ''
+                }
+                if (value !== this.form.pass) {
+                    this.confirmmessage = 'Пароли не сопадают'
+                } else {
+                    this.confirmmessage = 'Пароли совпадают'
+                }
             }
+        },
+        created() {
+            this.debounceCheckEmail = debounce(this.checkEmail, 500)
         }
     }
 </script>
-
 <style scoped>
 .auth {
     width: 100%;
@@ -136,8 +187,6 @@ form img {
     font-size: 40px;
     margin-bottom: 40px;
     font-weight: 700;
-}
-.inputs {
 }
 .reginputs {
     width: 100%;
