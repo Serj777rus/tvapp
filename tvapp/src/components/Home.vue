@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
     <div v-if="loading" class="loader_main"><span class="loader"></span></div>
-    <div class="main_page_div" v-else-if="isToken">
+    <div class="main_page_div" v-if="isToken">
         <div class="main_page">
             <div class="header">
                 <p>Привет {{ userName }}</p>
