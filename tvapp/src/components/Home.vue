@@ -242,7 +242,7 @@
             //     }
             // }
         },
-        async mounted() {
+        async created() {
           try {
               await this.getIsAuth(); // Ждём завершения загрузки данных
               if (this.isToken && this.myvideos.length !== 0) {
