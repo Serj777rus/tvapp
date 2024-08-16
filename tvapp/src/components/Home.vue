@@ -182,6 +182,7 @@
                         console.log(response.data.datas);
                         this.myvideos = response.data.datas;
                         this.isToken = true;
+                        this.loading = false;
                     }
                     } catch(error) {
                         console.log(error);
@@ -211,7 +212,7 @@
                     this.dataOfVideo = {};
                     this.arrL = [];
                     this.sendingData = {};
-                    this.getDataAfterAdd();
+                    await this.getDataAfterAdd();
                 }
             },
             async deleteVideo(id) {
@@ -240,6 +241,9 @@
         },
         async mounted() {
             await this.getIsAuth();
+            if (this.isToken && this.myvideos.length !== 0) {
+            this.loading = false;
+        }
         },
         watch:{
           myvideos(newValue) {
