@@ -241,12 +241,17 @@
         async mounted() {
             await this.getIsAuth();
         },
-        watch: {
-            isToken(newValue) {
-            if (newValue) {
-                this.loading = false;
+        watch:{
+          myvideos(newValue) {
+            if (newValue.length !== 0) {
+              this.loading = false
             }
+          },
+          isToken(newValue) {
+            if (newValue === true) {
+              this.loading = false
             }
+          }
         } 
     }
 </script>

@@ -12,7 +12,7 @@ const fsNopromise = require('fs');
 const path = require('path');
 const bodyParser = require('body-parser');
 const { Sequelize, DataTypes } = require('sequelize');
-const nodemailer = require('nodemailer');
+// const nodemailer = require('nodemailer');
 app.use(express.json());
 app.use(bodyParser.json());
 const publickDirectory = path.join(__dirname, 'playlists');
