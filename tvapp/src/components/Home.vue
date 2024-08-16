@@ -240,10 +240,15 @@
             }
         },
         async mounted() {
-            await this.getIsAuth();
-            if (this.isToken && this.myvideos.length !== 0) {
-            this.loading = false;
-        }
+          try {
+              await this.getIsAuth(); // Ждём завершения загрузки данных
+              if (this.isToken && this.myvideos.length !== 0) {
+                  this.loading = false; // Скрываем загрузку только после того, как данные получены
+              }
+          } catch (error) {
+              console.log(error);
+              this.loading = false; // Скрываем загрузку даже в случае ошибки
+          }
         },
         watch:{
           myvideos(newValue) {
