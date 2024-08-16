@@ -186,7 +186,7 @@ async function createTable(replaceMail, title, thumb, link) {
     } else {
         console.log('Таблица создана')
     }
-};
+}
 //Функция записи в файл
 async function writeFile(allVideo, replaceMail) {
     const pathFile = path.join(__dirname,'playlists', replaceMail, 'pl.m3u');
@@ -451,10 +451,14 @@ app.post('/deleteItem', async(req,res) => {
 //Получения списка видео после добавления
 app.get('/updata', async(req,res) => {
     const token = req.headers['authorization'].split(' ')[1];
+    console.log('Токен',token)
     try {
         const userId = jwt.verify(token, JWT_SECRET).id
+        console.log('Юзер', userId)
         const responseUser = await Users.findOne({where: {id: userId}});
+        console.log('Ответ БД', responseUser)
         const userTable = responseUser.dataValues.usertable;
+        console.log('Назывние таблицы', userTable)
         const CustomTable = sequelize.define('custom_table', {
             id: {
                 type: DataTypes.INTEGER,
