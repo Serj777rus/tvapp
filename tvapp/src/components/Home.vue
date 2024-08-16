@@ -242,11 +242,12 @@
             //     }
             // }
         },
-        async created() {
+        async mounted() {
           try {
               await this.getIsAuth(); // Ждём завершения загрузки данных
-              if (this.isToken && this.myvideos.length !== 0) {
+              if (this.isToken == true && this.myvideos.length !== 0) {
                   this.loading = false; // Скрываем загрузку только после того, как данные получены
+                  console.log('Статус загрузки в mounted', this.loading)
               }
           } catch (error) {
               console.log(error);
