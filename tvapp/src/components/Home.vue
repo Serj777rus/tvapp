@@ -182,10 +182,11 @@
                         console.log(response.data.datas);
                         this.myvideos = response.data.datas;
                         this.isToken = true;
-                        this.loading = false;
                     }
                     } catch(error) {
                         console.log(error);
+                    } finally {
+                      this.loading = false
                     }
                 }
             },
