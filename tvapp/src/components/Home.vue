@@ -213,7 +213,9 @@
                     this.dataOfVideo = {};
                     this.arrL = [];
                     this.sendingData = {};
-                    await this.getDataAfterAdd();
+                    this.myvideos = [];
+                    this.myvideos = response.data.datas
+                    // await this.getDataAfterAdd();
                 }
             },
             async deleteVideo(id) {
@@ -229,16 +231,16 @@
                         console.log(error);
                     }
             },
-            async getDataAfterAdd() {
-                const token = localStorage.getItem('jwt');
-                try {
-                    const response = await axios.get(`${this.nodesrv}/updata`, {headers: {'Authorization': `Berear ${token}`}});
-                    this.myvideos = [];
-                    this.myvideos = response.data.datas
-                } catch(error) {
-                    console.log(error)
-                }
-            }
+            // async getDataAfterAdd() {
+            //     const token = localStorage.getItem('jwt');
+            //     try {
+            //         const response = await axios.get(`${this.nodesrv}/updata`, {headers: {'Authorization': `Berear ${token}`}});
+            //         this.myvideos = [];
+            //         this.myvideos = response.data.datas
+            //     } catch(error) {
+            //         console.log(error)
+            //     }
+            // }
         },
         async mounted() {
           try {

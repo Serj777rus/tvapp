@@ -399,8 +399,8 @@ app.post('/savevideo', async(req, res) => {
         if (findUser) {
             const replaceMail = findUser.dataValues.usertable;
             await createTable(replaceMail, title, thumb, link);
-            // await writeDatainFile(replaceMail)
-            res.status(200).send('данные записаны')
+            const getVideo = await getVideosOfUser(replaceMail);
+            res.status(200).send({message: 'данные записаны', datas: getVideo})
         } else {
             res.status(500).send('Ошибка записи')
         }
@@ -449,44 +449,44 @@ app.post('/deleteItem', async(req,res) => {
     }
 })
 //Получения списка видео после добавления
-app.get('/updata', async(req,res) => {
-    const token = req.headers['authorization'].split(' ')[1];
-    console.log('Токен',token)
-    try {
-        const userId = jwt.verify(token, JWT_SECRET).id
-        console.log('Юзер', userId)
-        const responseUser = await Users.findOne({where: {id: userId}});
-        console.log('Ответ БД', responseUser)
-        const userTable = responseUser.dataValues.usertable;
-        console.log('Назывние таблицы', userTable)
-        const CustomTable = sequelize.define('custom_table', {
-            id: {
-                type: DataTypes.INTEGER,
-                autoIncrement: true,
-                primaryKey: true
-            },
-            title: {
-                type: DataTypes.STRING,
-                allowNull: false
-            },
-            thumb: {
-                type: DataTypes.STRING,
-                allowNull: true
-            },
-            link: {
-                type: DataTypes.STRING(1000),
-                allowNull: false
-            }
-        },
-        {
-            tableName: userTable
-        });
-        const responsNewData = await CustomTable.findAll();
-        res.status(200).json({datas: responsNewData})
-    } catch(error) {
-        console.log(error)
-    }
-})
+// app.get('/updata', async(req,res) => {
+//     const token = req.headers['authorization'].split(' ')[1];
+//     console.log('Токен',token)
+//     try {
+//         const userId = jwt.verify(token, JWT_SECRET).id
+//         console.log('Юзер', userId)
+//         const responseUser = await Users.findOne({where: {id: userId}});
+//         console.log('Ответ БД', responseUser)
+//         const userTable = responseUser.dataValues.usertable;
+//         console.log('Назывние таблицы', userTable)
+//         const CustomTable = sequelize.define('custom_table', {
+//             id: {
+//                 type: DataTypes.INTEGER,
+//                 autoIncrement: true,
+//                 primaryKey: true
+//             },
+//             title: {
+//                 type: DataTypes.STRING,
+//                 allowNull: false
+//             },
+//             thumb: {
+//                 type: DataTypes.STRING,
+//                 allowNull: true
+//             },
+//             link: {
+//                 type: DataTypes.STRING(1000),
+//                 allowNull: false
+//             }
+//         },
+//         {
+//             tableName: userTable
+//         });
+//         const responsNewData = await CustomTable.findAll();
+//         res.status(200).json({datas: responsNewData})
+//     } catch(error) {
+//         console.log(error)
+//     }
+// })
 //Проверка пользователя
 app.post('/checkmail', async(req,res) => {
     const email = req.body.email
