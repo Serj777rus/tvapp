@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-    <div v-if="loading" class="loader_main"><span class="loader"></span></div>
-    <div class="main_page_div" v-if="isToken">
+    <div v-if="loading && !isToken" class="loader_main"><span class="loader"></span></div>
+    <div class="main_page_div" v-else>
         <div class="main_page">
             <div class="header">
                 <p>Привет {{ userName }}</p>
@@ -73,11 +73,11 @@
             </div>
         </div>
     </div>
-    <div class="auth_block" v-else>
+    <!-- <div class="auth_block" v-else>
         <p>Если Вы еще не зарегитсрировались или не авторизовались, то перейдите на стрицу авторизации</p>
         <button @click="this.$router.push('/auth')">Перейти</button>
         <p>Если Вы аторизованы, но видите это, то просто перезагрузите страницу</p>
-    </div>
+    </div> -->
     <NavBar></NavBar>
 </template>
 
