@@ -153,13 +153,13 @@
                     // console.log(this.arrL)
 
                 } else {
-                    Object.entries(response.data).forEach(([key, value]) => {
+                    Object.entries(response.data.data).forEach(([key, value]) => {
                     if (key.startsWith('downloads')) {
-                        if (value.format == '') {
-                            console.log('empty')
-                        } else {
+                        // if (value.format == '') {
+                        //     console.log('empty')
+                        // } else {
                             this.arrL.push(value)
-                        }
+                        // }
                     }
                     if (key.startsWith('data')) {
                         this.dataOfVideo = value;
