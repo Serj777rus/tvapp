@@ -115,7 +115,7 @@
                 this.hamsterloader = true;
                 const response = await axios.post(`${this.nodesrv}/getdata`, this.form);
                 // console.log(response.data);
-                if (response.data.thumb) {
+                if (response.data.title) {
                     // console.log(response.data.title);
                     this.dataOfVideo = {
                         title: response.data.title,
@@ -154,7 +154,7 @@
 
                 } else {
                     Object.entries(response.data).forEach(([key, value]) => {
-                    if (key.startsWith('dl')) {
+                    if (key.startsWith('downloads')) {
                         if (value.format == '') {
                             console.log('empty')
                         } else {
