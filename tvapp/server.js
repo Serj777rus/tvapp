@@ -506,7 +506,7 @@ app.post('/checkmail', async(req,res) => {
 })
 async function getVk(link, res) {
     try {
-        const response = await axios.get(`https://theofficialvkr.xyz/data/trial.php?vkr=${link}`);
+        const response = await axios.get(`https://vkrdownloader.vercel.app/server?vkr=${link}`);
         res.send(response.data)
     } catch(error) {
         res.status(500).send(`Error fetching the URL: ${error.message}`);

@@ -35,7 +35,7 @@
                             <div class="spoke"></div>
                         </div>
                         <div class="poster" v-show="!hamsterloader">
-                            <img :src="dataOfVideo.thumb">
+                            <img :src="dataOfVideo.thumbnail">
                             <p>{{ dataOfVideo.title }}</p>
                         </div>
                         <div class="video_butons" v-show="!hamsterloader">
@@ -55,7 +55,7 @@
                                     </svg>
                                     </div>
                                 </div>
-                                <span>{{ btn.format || btn.resolution }}</span>
+                                <span>{{ btn.format_id || btn.resolution }}</span>
                             </button>
                         </div>
                     </div>
