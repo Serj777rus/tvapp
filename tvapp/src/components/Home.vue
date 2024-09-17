@@ -153,7 +153,7 @@
                     // console.log(this.arrL)
 
                 } else {
-                    Object.entries(response.data.data).forEach(([key, value]) => {
+                    Object.entries(response.data).forEach(([key, value]) => {
                     if (key.startsWith('downloads')) {
                         // if (value.format == '') {
                         //     console.log('empty')
