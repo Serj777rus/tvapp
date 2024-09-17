@@ -115,7 +115,7 @@
                 this.hamsterloader = true;
                 const response = await axios.post(`${this.nodesrv}/getdata`, this.form);
                 // console.log(response.data);
-                if (response.data.title) {
+                if (response.data.thumb) {
                     // console.log(response.data.title);
                     this.dataOfVideo = {
                         title: response.data.title,
