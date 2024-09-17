@@ -153,7 +153,7 @@
                     // console.log(this.arrL)
 
                 } else {
-                    Object.entries(response.data).forEach(([key, value]) => {
+                    Object.entries(response.data.data).forEach(([key, value]) => {
                     if (key.startsWith('downloads')) {
                         // if (value.format == '') {
                         //     console.log('empty')
@@ -161,8 +161,11 @@
                             this.arrL.push(value)
                         // }
                     }
-                    if (key.startsWith('data')) {
-                        this.dataOfVideo = value;
+                    else if (key.startsWith('title')) {
+                        this.dataOfVideo.title = value;
+                    }
+                    else if (key.startsWith('thumbnail')) {
+                      this.dataOfVideo.thumbnail = value
                     }
                 });
                 this.hamsterloader = false
