@@ -158,7 +158,10 @@
                         // if (value.format == '') {
                         //     console.log('empty')
                         // } else {
-                            this.arrL.push(value)
+                            value.forEach(el => {
+                              this.arrL.push(el)
+                            })
+                            // this.arrL.push(value)
                         // }
                     }
                     else if (key.startsWith('title')) {
