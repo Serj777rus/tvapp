@@ -209,7 +209,7 @@
             },
             async inputSendingData(link) {
                 this.sendingData.link = link
-                this.sendingData.thumb = this.dataOfVideo.thumb
+                this.sendingData.thumb = this.dataOfVideo.thumbnail
                 this.sendingData.title = this.dataOfVideo.title
                 console.log(this.sendingData);
                 const token = localStorage.getItem('jwt')
