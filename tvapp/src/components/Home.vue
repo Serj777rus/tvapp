@@ -119,7 +119,7 @@
                     // console.log(response.data.title);
                     this.dataOfVideo = {
                         title: response.data.title,
-                        thumb: response.data.thumb
+                        thumbnail: response.data.thumb
                     }
                     let strings = response.data.links.split('\n');
                     const filteredLines = strings.filter(strings => strings !== "#EXTM3U");
