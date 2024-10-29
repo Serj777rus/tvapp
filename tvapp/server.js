@@ -250,7 +250,7 @@ async function getVideosOfUser(usertable) {
 //         console.log(error)
 //     }
 // }
-var salt = bcrypt.genSaltSync(10); //cоль для хэширования паролей
+const salt = bcrypt.genSaltSync(10); //cоль для хэширования паролей
 
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*'); // Разрешить все источники
